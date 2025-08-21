@@ -15,7 +15,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     env: 
-      NEXT_PUBLIC_BASE_PATH: birthday-games
+      NEXT_PUBLIC_BASE_PATH: /birthday-games
       NEXT_PUBLIC_API_BASE: https://68a6840d639c6a54e99eefa9.mockapi.io/birthday-games
       NEXT_PUBLIC_ADMIN_PATH: admin
     steps:
