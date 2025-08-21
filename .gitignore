@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+dist/
+.vercel/
+
+# Env files
+.env*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# OS/Editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
