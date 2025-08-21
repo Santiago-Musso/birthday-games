@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbo",
     "build": "next build",
-    "export": "next export -o dist",
+    "export": "next export",
     "start": "next start",
     "lint": "echo 'no lint configured'"
   },

@@ -35,7 +35,7 @@ jobs:
         run: npm run lint || true
 
       - name: Build static site
-        run: npm run build && npm run export
+        run: npm run build && npm run export && mv out dist
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
