@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body { height: 100%; }
+
+/*
+  Design tokens and theming
+  - CSS custom properties define light/dark palettes
+  - Tailwind reads some via theme.extend.colors in tailwind.config.ts
+*/
+@layer base {
+  :root {
+    /* Modern color palette (oklch); fallbacks applied via Tailwind class colors when unsupported */
+    --primary: 0.65 0.18 254; /* blue-600 */
+    --secondary: 0.75 0.12 330; /* fuchsia-ish */
+    --accent: 0.8 0.12 150; /* teal-ish */
+
+    /* Neutral surfaces in RGB for broad support */
+    --bg: 248 250 252; /* slate-50 */
+    --surface: 255 255 255; /* white */
+    --text: 17 24 39; /* gray-900 */
+
+    /* Radii tokens */
+    --radius-4: 4px;
+    --radius-8: 8px;
+    --radius-12: 12px;
+    --radius-16: 16px;
+
+    /* Shadows */
+    --shadow-color: 0 0% 0%;
+  }
+  .dark {
+    --primary: 0.7 0.18 254; /* slightly brighter in dark */
+    --secondary: 0.82 0.14 330;
+    --accent: 0.85 0.14 150;
+    /* Slightly lifted surfaces to separate layers better */
+    --bg: 8 11 22; /* deep navy */
+    --surface: 20 22 28; /* elevated panel */
+    --text: 229 231 235; /* gray-200 */
+  }
+
+  html {
+    color-scheme: light dark;
+    /* Fluid type scale using clamp for headings */
+  }
+  body {
+    @apply antialiased text-[rgb(var(--text))] bg-[rgb(var(--bg))];
+  }
+
+  /* Headings fluid scale (mobile-first) */
+  h1 { font-weight: 800; font-size: clamp(1.375rem, 1.1rem + 1.5vw, 2.25rem); }
+  h2 { font-weight: 700; font-size: clamp(1.125rem, 1rem + 1vw, 1.5rem); }
+  h3 { font-weight: 600; font-size: clamp(1rem, 0.95rem + 0.5vw, 1.25rem); }
+
+  /* Better focus styles */
+  :focus-visible { outline: 2px solid oklch(var(--accent)); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  }
+}
+
+/* Fun, friendly UI primitives updated for glassmorphism */
+.card { @apply rounded-2xl border bg-[rgb(var(--surface))]/80 shadow-subtle supports-[backdrop-filter]:backdrop-blur-md dark:border-white/10; }
+.card-header { @apply flex items-center justify-between p-4; }
+.card-body { @apply p-4; }
+.pill { @apply inline-flex items-center gap-1 rounded-full border border-gray-200 px-2 py-0.5 text-xs dark:border-white/10 dark:bg-white/5 dark:text-gray-300; }
+.btn-primary { @apply inline-flex items-center gap-2 rounded-full bg-[oklch(var(--primary))] text-white px-3 py-2 text-sm font-medium shadow-soft hover:shadow-glass transition active:scale-[0.99]; }
+.btn-ghost { @apply inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm text-gray-700 hover:bg-black/5 dark:text-gray-200 dark:hover:bg-white/10; }
+
+/* Skeleton loaders */
+.skeleton { background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.12) 37%, rgba(0,0,0,0.06) 63%); background-size: 400% 100%; @apply animate-shimmer rounded; }
+.skeleton-text { @apply skeleton h-4; }
+.skeleton-avatar { @apply skeleton rounded-full; }
+
+/* Floating Action Button */
+.fab { @apply fixed right-4 bottom-4 z-40 rounded-full bg-[oklch(var(--primary))] text-white shadow-glass px-5 py-3; }
+
+/* Sticky header styles with scroll-aware subtle border */
+.site-header { @apply sticky top-0 z-30 bg-[rgb(var(--surface))]/70 supports-[backdrop-filter]:backdrop-blur-md; }
+.site-header-inner { @apply max-w-2xl mx-auto px-3 h-12 flex items-center justify-between; }
+.site-header.scrolled { @apply border-b border-black/5 dark:border-white/10; }
+
+/* Utility helpers */
+.will-change-transform { will-change: transform; }
+.parallax { transform-style: preserve-3d; }
+
+
+
