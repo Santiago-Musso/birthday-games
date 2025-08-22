@@ -23,6 +23,7 @@ The workflow builds with `next build` and exports static HTML to `dist/`, then p
 The app reads these environment variables at build/runtime:
 
 - `NEXT_PUBLIC_API_BASE` (optional): Base URL for the API. Defaults to MockAPI used by the project.
+- `NEXT_PUBLIC_ENABLE_PLAYER_SCORES` (optional): Set to `true` to enable per-user scoring endpoints. Leave unset/false if your API doesn't provide `/playerScores` to avoid 404s.
 - `NEXT_PUBLIC_BASE_PATH` (optional but recommended for GitHub Pages): Subpath where the site is hosted (e.g., `/birthday-games`).
 
 You can set these locally in `.env.local` and on GitHub as “Repository variables” or “Actions secrets & variables”.

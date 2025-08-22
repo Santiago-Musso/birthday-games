@@ -12,6 +12,7 @@ const gameLabels: Record<GameKey, string> = {
   punch: 'Punch',
   bowling: 'Bowling',
 }
+import { GameIcon } from './icons/GameIcon'
 
 export function TeamCard({ team, players, assignments, scores, youId, playerScores }: { team: Team; players: Player[]; assignments?: Assignment[]; scores?: Score[]; youId?: string | null; playerScores?: PlayerScore[] }) {
   const byId: Record<string, Player> = Object.fromEntries(players.map((p) => [p.id, p]))
@@ -39,7 +40,7 @@ export function TeamCard({ team, players, assignments, scores, youId, playerScor
               if (!player) return null
               return (
                 <div key={`${a.teamId}-${a.game}`} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white/80 supports-[backdrop-filter]:backdrop-blur px-2 py-1 text-xs dark:border-white/10 dark:bg-white/5">
-                  <span className="capitalize text-gray-600">{gameLabels[a.game as keyof typeof gameLabels]}</span>
+                  <span className="capitalize text-gray-600 dark:text-gray-300 flex items-center gap-1"><GameIcon game={a.game as any} /> {gameLabels[a.game as keyof typeof gameLabels]}</span>
                   <span className="font-medium">{player.name}</span>
                 </div>
               )
@@ -57,7 +58,7 @@ export function TeamCard({ team, players, assignments, scores, youId, playerScor
               {p.avatarKey ? (
                 <Avatar keyName={p.avatarKey as any} className="h-6 w-6" />
               ) : (
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold dark:bg-white/10 dark:text-gray-100">
                   {p.name.slice(0,1).toUpperCase()}
                 </span>
               )}

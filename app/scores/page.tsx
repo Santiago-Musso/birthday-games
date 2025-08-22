@@ -9,6 +9,7 @@ import type { GameKey, Player, Assignment } from '@/types/domain'
 import { getStoredPlayerId } from '@/lib/storage'
 import { listAssignments } from '@/lib/assignments'
 import { Avatar } from '@/components/avatars/Avatars'
+import { GameIcon } from '@/components/icons/GameIcon'
 
 const allGames: GameKey[] = ['daytona', 'basket', 'pump_it', 'air_tejo', 'punch', 'bowling']
 
@@ -17,7 +18,8 @@ export default function ScoresPage() {
   const playersQ = useQuery({ queryKey: ['players'], queryFn: listPlayers })
   const teamsQ = useQuery({ queryKey: ['teams'], queryFn: listTeams })
   const assignmentsQ = useQuery({ queryKey: ['assignments'], queryFn: listAssignments })
-  const playerScoresQ = useQuery({ queryKey: ['playerScores'], queryFn: listPlayerScores })
+  const enablePlayerScores = process.env.NEXT_PUBLIC_ENABLE_PLAYER_SCORES === 'true'
+  const playerScoresQ = useQuery({ queryKey: ['playerScores'], queryFn: listPlayerScores, enabled: enablePlayerScores })
   const scoresQ = useQuery({ queryKey: ['scores'], queryFn: listScores })
 
   const [scoreDrafts, setScoreDrafts] = useState<Record<string, number>>({})
@@ -39,15 +41,15 @@ export default function ScoresPage() {
     return !!you?.isAdmin
   }, [playersQ.data, youId])
 
-  const loading = playersQ.isLoading || teamsQ.isLoading || scoresQ.isLoading || assignmentsQ.isLoading || playerScoresQ.isLoading
+  const loading = playersQ.isLoading || teamsQ.isLoading || scoresQ.isLoading || assignmentsQ.isLoading || (enablePlayerScores && playerScoresQ.isLoading)
   if (loading) return <div className="py-10 text-center">Loading…</div>
-  if (playersQ.error || teamsQ.error || scoresQ.error || assignmentsQ.error || playerScoresQ.error) return <div className="py-10 text-center text-red-600 dark:text-red-400">Failed to load scores.</div>
+  if (playersQ.error || teamsQ.error || scoresQ.error || assignmentsQ.error || (enablePlayerScores && playerScoresQ.error)) return <div className="py-10 text-center text-red-600 dark:text-red-400">Failed to load scores.</div>
 
   const teams = teamsQ.data || []
   const scores = existingScores
   const players = playersQ.data || []
   const assignments = assignmentsQ.data || []
-  const playerScores = playerScoresQ.data || []
+  const playerScores = (playerScoresQ.data as any) || []
 
   function getTeamTotal(teamId: string) {
     const teamPlayers = players.filter((p) => p.teamId === teamId).map((p) => p.id)
@@ -127,7 +129,7 @@ export default function ScoresPage() {
                           const label = g === 'bowling' ? 'Bowling' : g.replace('_', ' ')
                           return (
                             <div key={key} className="flex items-center gap-3 rounded-xl border px-3 py-2 dark:border-white/10">
-                              <span className="text-sm text-gray-600 dark:text-gray-400 w-24 sm:w-28 capitalize">{label}</span>
+                              <span className="text-sm text-gray-600 dark:text-gray-400 w-24 sm:w-28 capitalize inline-flex items-center gap-2"><GameIcon game={g} /> {label}</span>
                               {isAdmin ? (
                                 <input
                                   type="number"

@@ -4,19 +4,27 @@ import { useQuery } from '@tanstack/react-query'
 import { getPlayer } from '@/lib/players'
 import { listTeams } from '@/lib/teams'
 import { RadarSkills } from '@/components/RadarSkills'
- 
+import { listPlayerScores } from '@/lib/scores'
+import type { GameKey } from '@/types/domain'
+import { GameIcon } from './icons/GameIcon'
 import { Avatar, AVATAR_LABELS } from './avatars/Avatars'
 
 export function PlayerDetailClient({ id }: { id: string }) {
   const playerQ = useQuery({ queryKey: ['players', id], queryFn: () => getPlayer(id), enabled: !!id })
   const teamsQ = useQuery({ queryKey: ['teams'], queryFn: listTeams })
+  const playerScoresQ = useQuery({ queryKey: ['playerScores'], queryFn: listPlayerScores })
 
-  if (playerQ.isLoading || teamsQ.isLoading) return <div className="py-10 text-center">Loading…</div>
+  if (playerQ.isLoading || teamsQ.isLoading || playerScoresQ.isLoading) return <div className="py-10 text-center">Loading…</div>
   if (playerQ.error || !playerQ.data) return <div className="py-10 text-center text-red-600 dark:text-red-400">Player not found.</div>
 
   const player = playerQ.data
   const team = teamsQ.data?.find((t) => t.id === player.teamId)
- 
+  const scores = (playerScoresQ.data || []).filter((s) => s.playerId === player.id)
+  const total = scores.reduce((a, s) => a + (Number(s.value) || 0), 0)
+  const byGame = scores.reduce<Record<GameKey, number>>((acc, s: any) => {
+    acc[s.game as GameKey] = (acc[s.game as GameKey] || 0) + (Number(s.value) || 0)
+    return acc
+  }, {} as any)
 
   return (
     <div className="space-y-6">
@@ -38,7 +46,20 @@ export function PlayerDetailClient({ id }: { id: string }) {
         <RadarSkills skills={player.skills} />
       </div>
 
-      
+      <div className="rounded-2xl border p-4 dark:border-white/10 card">
+        <div className="flex items-center justify-between">
+          <div className="text-sm font-medium">Points</div>
+          <span className="pill dark:border-white/10">Total: {total}</span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+          {(['daytona','basket','pump_it','air_tejo','punch','bowling'] as GameKey[]).map((g) => (
+            <div key={g} className="flex items-center justify-between rounded-lg border px-2 py-1 dark:border-white/10">
+              <div className="flex items-center gap-2 capitalize"><GameIcon game={g} /> {g.replace('_',' ')}</div>
+              <div className="font-medium">{byGame[g] ?? 0}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {team && (
         <div className="rounded-2xl border p-4 dark:border-white/10 card">

@@ -11,17 +11,19 @@ import { Scoreboard } from '@/components/Scoreboard'
 import { getStoredPlayerId } from '@/lib/storage'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { GameIcon } from '@/components/icons/GameIcon'
 
 export default function MainPage() {
   const playersQuery = useQuery({ queryKey: ['players'], queryFn: listPlayers })
   const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: listTeams })
   const scoresQuery = useQuery({ queryKey: ['scores'], queryFn: listScores })
-  const playerScoresQuery = useQuery({ queryKey: ['playerScores'], queryFn: listPlayerScores })
+  const enablePlayerScores = process.env.NEXT_PUBLIC_ENABLE_PLAYER_SCORES === 'true'
+  const playerScoresQuery = useQuery({ queryKey: ['playerScores'], queryFn: listPlayerScores, enabled: enablePlayerScores })
   const assignmentsQuery = useQuery({ queryKey: ['assignments'], queryFn: listAssignments })
 
   const playerId = getStoredPlayerId()
 
-  if (playersQuery.isLoading || teamsQuery.isLoading || scoresQuery.isLoading || assignmentsQuery.isLoading || playerScoresQuery.isLoading) {
+  if (playersQuery.isLoading || teamsQuery.isLoading || scoresQuery.isLoading || assignmentsQuery.isLoading || (enablePlayerScores && playerScoresQuery.isLoading)) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -49,18 +51,27 @@ export default function MainPage() {
       </div>
     )
   }
-  if (playersQuery.error || teamsQuery.error || scoresQuery.error || assignmentsQuery.error || playerScoresQuery.error) {
+  if (playersQuery.error || teamsQuery.error || scoresQuery.error || assignmentsQuery.error || (enablePlayerScores && playerScoresQuery.error)) {
     return <div className="text-center py-10 text-red-600">Failed to load data.</div>
   }
 
   const players = playersQuery.data || []
   const teams = teamsQuery.data || []
   const scores = scoresQuery.data || []
-  const playerScores = playerScoresQuery.data || []
+  const playerScores = (playerScoresQuery.data as any) || []
   const assignments = assignmentsQuery.data || []
 
   const hasTeams = teams.length > 0
   const youTeamId = players.find((p) => p.id === playerId)?.teamId || null
+  const perPlayerTotals: Record<string, number> = {}
+  if (playerScores.length > 0) {
+    for (const s of playerScores) {
+      perPlayerTotals[s.playerId] = (perPlayerTotals[s.playerId] || 0) + (Number(s.value) || 0)
+    }
+  }
+  const youPoints = playerId ? (
+    playerScores.length > 0 ? playerScores.filter((s) => s.playerId === playerId).reduce((acc, s) => acc + (Number(s.value) || 0), 0) : 0
+  ) : 0
 
   return (
     <div className="space-y-6">
@@ -75,7 +86,13 @@ export default function MainPage() {
         {!playerId ? (
           <Link className="btn-primary" href="/create-player"><span>➕</span><span>Create player</span></Link>
         ) : (
-          <Link className="btn-ghost" href={`/players?id=${playerId}`} title="View your profile">👤 Me</Link>
+          <Link className="btn-ghost" href={`/players?id=${playerId}`} title="View your profile">
+            <span>👤 Me</span>
+            <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm sm:text-base dark:border-white/10">
+              <span className="font-semibold">{youPoints}</span>
+              <span className="text-[11px] sm:text-xs">pts</span>
+            </span>
+          </Link>
         )}
       </header>
 
@@ -97,7 +114,7 @@ export default function MainPage() {
           <h2 className="text-lg font-medium mb-2">Participants</h2>
           <div className="grid gap-3">
             {players.map((p) => {
-              const points = playerScores.filter((s) => s.playerId === p.id).reduce((acc, s) => acc + (Number(s.value) || 0), 0)
+              const points = playerScores.length > 0 ? playerScores.filter((s) => s.playerId === p.id).reduce((acc, s) => acc + (Number(s.value) || 0), 0) : 0
               return <PlayerCard key={p.id} player={p} highlight={p.id === playerId} points={points} />
             })}
           </div>
@@ -114,6 +131,7 @@ export default function MainPage() {
                 assignments={assignments.filter((a) => a.teamId === t.id)}
                 scores={scores}
                 youId={playerId}
+                playerScores={playerScores}
               />
             ))}
           </div>

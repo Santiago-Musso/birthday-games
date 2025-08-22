@@ -1,6 +1,7 @@
 "use client"
 
 import type { GameKey, Score, Team, Player, PlayerScore } from '@/types/domain'
+import { GameIcon } from './icons/GameIcon'
 
 const gameKeys: GameKey[] = ['daytona', 'basket', 'pump_it', 'air_tejo', 'punch', 'bowling']
 
@@ -11,7 +12,7 @@ export function Scoreboard({ teams, scores, youTeamId, playerScores, players }: 
     totalByTeam[t.id] = 0
     perGameByTeam[t.id] = {}
   }
-  if (playerScores && players) {
+  if (playerScores && playerScores.length > 0 && players) {
     const playerById: Record<string, Player> = Object.fromEntries(players.map((p) => [p.id, p]))
     for (const ps of playerScores) {
       const p = playerById[ps.playerId]
@@ -46,8 +47,8 @@ export function Scoreboard({ teams, scores, youTeamId, playerScores, players }: 
           </div>
           <div className="mt-2 flex flex-wrap gap-2 text-xs text-gray-700 dark:text-gray-300">
             {gameKeys.map((g) => (
-              <div key={g} className="rounded border px-2 py-1 capitalize border-black/10 dark:border-white/10 dark:bg-white/5">
-                {g.replace('_', ' ')}: {perGameByTeam[t.id]?.[g] ?? 0}
+              <div key={g} className="rounded border px-2 py-1 capitalize border-black/10 dark:border-white/10 dark:bg-white/5 flex items-center gap-1">
+                <GameIcon game={g} /> {g.replace('_', ' ')}: {perGameByTeam[t.id]?.[g] ?? 0}
               </div>
             ))}
           </div>
