@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { listPlayers } from '@/lib/players'
 import { listTeams } from '@/lib/teams'
 import { listScores, upsertScore, listPlayerScores, upsertPlayerScore } from '@/lib/scores'
-import type { GameKey, Player, Assignment } from '@/types/domain'
+import type { GameKey, Player, Assignment, PlayerScore, Score } from '@/types/domain'
 import { getStoredPlayerId } from '@/lib/storage'
 import { listAssignments } from '@/lib/assignments'
 import { Avatar } from '@/components/avatars/Avatars'
@@ -23,7 +23,7 @@ export default function ScoresPage() {
   const scoresQ = useQuery({ queryKey: ['scores'], queryFn: listScores })
 
   const [scoreDrafts, setScoreDrafts] = useState<Record<string, number>>({})
-  const existingScores = useMemo(() => scoresQ.data || [], [scoresQ.data])
+  const existingScores = useMemo<Score[]>(() => (scoresQ.data as any) || [], [scoresQ.data])
 
   useEffect(() => {
     const next: Record<string, number> = { ...scoreDrafts }
@@ -49,13 +49,13 @@ export default function ScoresPage() {
   const scores = existingScores
   const players = playersQ.data || []
   const assignments = assignmentsQ.data || []
-  const playerScores = (playerScoresQ.data as any) || []
+  const playerScores: PlayerScore[] = ((playerScoresQ.data as unknown) as PlayerScore[]) || []
 
   function getTeamTotal(teamId: string) {
     const teamPlayers = players.filter((p) => p.teamId === teamId).map((p) => p.id)
-    const ps = playerScores.filter((s) => teamPlayers.includes(s.playerId))
-    if (ps.length > 0) return ps.reduce((acc, s) => acc + (Number(s.value) || 0), 0)
-    return scores.filter((s) => s.teamId === teamId).reduce((acc, s) => acc + (Number(s.value) || 0), 0)
+    const ps = playerScores.filter((s: PlayerScore) => teamPlayers.includes(s.playerId))
+    if (ps.length > 0) return ps.reduce((acc: number, s: PlayerScore) => acc + (Number(s.value) || 0), 0)
+    return scores.filter((s: Score) => s.teamId === teamId).reduce((acc: number, s: Score) => acc + (Number(s.value) || 0), 0)
   }
 
   async function saveAll() {
