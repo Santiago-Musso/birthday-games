@@ -12,6 +12,7 @@ import { getStoredPlayerId } from '@/lib/storage'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { GameIcon } from '@/components/icons/GameIcon'
+import type { PlayerScore } from '@/types/domain'
 
 export default function MainPage() {
   const playersQuery = useQuery({ queryKey: ['players'], queryFn: listPlayers })
@@ -58,7 +59,7 @@ export default function MainPage() {
   const players = playersQuery.data || []
   const teams = teamsQuery.data || []
   const scores = scoresQuery.data || []
-  const playerScores = (playerScoresQuery.data as any) || []
+  const playerScores: PlayerScore[] = ((playerScoresQuery.data as unknown) as PlayerScore[]) || []
   const assignments = assignmentsQuery.data || []
 
   const hasTeams = teams.length > 0
@@ -70,7 +71,7 @@ export default function MainPage() {
     }
   }
   const youPoints = playerId ? (
-    playerScores.length > 0 ? playerScores.filter((s) => s.playerId === playerId).reduce((acc, s) => acc + (Number(s.value) || 0), 0) : 0
+    playerScores.length > 0 ? playerScores.filter((s: PlayerScore) => s.playerId === playerId).reduce((acc: number, s: PlayerScore) => acc + (Number(s.value) || 0), 0) : 0
   ) : 0
 
   return (
@@ -114,7 +115,7 @@ export default function MainPage() {
           <h2 className="text-lg font-medium mb-2">Participants</h2>
           <div className="grid gap-3">
             {players.map((p) => {
-              const points = playerScores.length > 0 ? playerScores.filter((s) => s.playerId === p.id).reduce((acc, s) => acc + (Number(s.value) || 0), 0) : 0
+              const points = playerScores.length > 0 ? playerScores.filter((s: PlayerScore) => s.playerId === p.id).reduce((acc: number, s: PlayerScore) => acc + (Number(s.value) || 0), 0) : 0
               return <PlayerCard key={p.id} player={p} highlight={p.id === playerId} points={points} />
             })}
           </div>
